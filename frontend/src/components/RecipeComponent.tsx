@@ -30,6 +30,7 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'sale'>('sale');
   const [selectedIngredients, setSelectedIngredients] = useState<Ingredient[]>([]);
   const [debugMode, setDebugMode] = useState<boolean>(false);
+  const [apiRecipesLoaded, setApiRecipesLoaded] = useState<boolean>(false);
 
   // Home ingredients list
   const homeIngredients = [
@@ -44,6 +45,87 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
     'Olive Oil',
     'Cheese'
   ];
+
+  // Hard-coded recipes with common ingredients
+  const hardcodedRecipes: Recipe[] = [
+    {
+      id: "hc001",
+      title: "Quick Chicken Stir Fry",
+      img: "https://www.simplyrecipes.com/thmb/YSlSLYrnOBfHOGOYMnN8l_eUFzs=/2000x1125/filters:no_upscale():max_bytes(150000):strip_icc()/Simply-Recipes-Chicken-Stir-Fry-LEAD-6-47b5da1a92b644be86918c528169f059.jpg",
+      cost: 12.75,
+      content: "1. Slice chicken into thin strips. 2. Chop vegetables. 3. Stir-fry chicken until cooked through. 4. Add vegetables and sauté. 5. Add sauce and toss to coat.",
+      usedIngredients: [
+        { name: "chicken breast", cost: 7.99 },
+        { name: "onion", cost: 0.79 },
+        { name: "garlic", cost: 0.49 },
+        { name: "olive oil", cost: 0 },
+      ],
+      missedIngredients: ["bell pepper", "broccoli", "soy sauce", "ginger", "sesame oil"],
+      apiIngredients: ["chicken breast", "onion", "garlic", "olive oil", "bell pepper", "broccoli", "soy sauce", "ginger", "sesame oil"],
+      link: "https://www.simplyrecipes.com/recipes/quick_easy_chicken_stir_fry/"
+    },
+    {
+      id: "hc002",
+      title: "Classic Caesar Salad",
+      img: "https://www.seriouseats.com/thmb/Fi_FEyVa3_-_uzfXiCZ0ShYwht8=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/__opt__aboutcom__coeus__resources__content_migration__serious_eats__seriouseats.com__recipes__images__2013__10__20131009-caesar-salad-how-17-66824dc8c0a8453293b0b8c74cdad20d.jpg",
+      cost: 8.25,
+      content: "1. Wash and tear romaine lettuce. 2. Make dressing with egg, garlic, anchovy paste, lemon juice, and olive oil. 3. Toast bread for croutons. 4. Toss lettuce with dressing and top with parmesan.",
+      usedIngredients: [
+        { name: "lettuce", cost: 2.49 },
+        { name: "garlic", cost: 0.49 },
+        { name: "lemon", cost: 0.79 },
+        { name: "olive oil", cost: 0 },
+        { name: "cheese", cost: 3.99 }
+      ],
+      missedIngredients: ["anchovy paste", "eggs", "crusty bread"],
+      apiIngredients: ["romaine lettuce", "garlic", "lemon", "olive oil", "parmesan cheese", "anchovy paste", "eggs", "bread"],
+      link: "https://www.seriouseats.com/the-best-caesar-salad-recipe"
+    },
+    {
+      id: "hc003",
+      title: "Mediterranean Cucumber Tomato Salad",
+      img: "https://www.acouplecooks.com/wp-content/uploads/2021/07/Cucumber-Tomato-Onion-Salad-007.jpg",
+      cost: 7.50,
+      content: "1. Dice cucumber, tomato, and red onion. 2. Mix with olives and feta cheese. 3. Dress with olive oil, lemon juice, salt, and herbs.",
+      usedIngredients: [
+        { name: "cucumber", cost: 1.29 },
+        { name: "tomato", cost: 1.99 },
+        { name: "onion", cost: 0.79 },
+        { name: "lemon", cost: 0.79 },
+        { name: "olive oil", cost: 0 },
+        { name: "cheese", cost: 3.99 }
+      ],
+      missedIngredients: ["kalamata olives", "fresh herbs"],
+      apiIngredients: ["cucumber", "tomato", "red onion", "lemon", "olive oil", "feta cheese", "kalamata olives", "fresh herbs"],
+      link: "https://www.acouplecooks.com/cucumber-tomato-onion-salad/"
+    },
+    {
+      id: "hc004",
+      title: "Simple Roast Chicken with Vegetables",
+      img: "https://www.wellplated.com/wp-content/uploads/2020/12/Baked-Chicken-and-Vegetables-recipe.jpg",
+      cost: 11.99,
+      content: "1. Season chicken with herbs, salt, and pepper. 2. Arrange vegetables around chicken in roasting pan. 3. Drizzle with olive oil. 4. Roast at 425°F until chicken is cooked through and vegetables are tender.",
+      usedIngredients: [
+        { name: "chicken breast", cost: 7.99 },
+        { name: "garlic", cost: 0.49 },
+        { name: "onion", cost: 0.79 },
+        { name: "olive oil", cost: 0 },
+        { name: "lemon", cost: 0.79 },
+        { name: "apple", cost: 1.99 }
+      ],
+      missedIngredients: ["potatoes", "carrots", "rosemary", "thyme"],
+      apiIngredients: ["chicken breast", "garlic", "onion", "olive oil", "lemon", "apple", "potatoes", "carrots", "rosemary", "thyme"],
+      link: "https://www.wellplated.com/roasted-chicken-and-vegetables/"
+    }
+  ];
+
+  // Initialize with hard-coded recipes on component mount
+  useEffect(() => {
+    // Only set hard-coded recipes initially if no recipes are loaded yet
+    if (recipes.length === 0) {
+      setRecipes(hardcodedRecipes);
+    }
+  }, []);
 
   // Convert home ingredients to the proper format
   const homeIngredientsFormatted = homeIngredients.map(name => ({
@@ -217,6 +299,12 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
     }
   };
 
+  // Reset to default recommended recipes
+  const resetToHardcodedRecipes = () => {
+    setApiRecipesLoaded(false);
+    setRecipes(hardcodedRecipes);
+  };
+
   // Fetch recipes from API
   const fetchRecipes = async () => {
     setError(null);
@@ -242,7 +330,9 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
       const data = await response.json();
 
       if (!data || data.length === 0) {
-        setError("No recipes found with selected ingredients.");
+        // If no API recipes found, just show hard-coded recipes
+        setRecipes(hardcodedRecipes);
+        setApiRecipesLoaded(false);
         setLoading(false);
         return;
       }
@@ -267,23 +357,61 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
           content: details.instructions,
           usedIngredients: details.usedIngredients,
           missedIngredients: recipe.missedIngredients.map((ingredient: any) => ingredient.name),
-          apiIngredients: details.apiIngredients
+          apiIngredients: details.apiIngredients,
+          link: `https://spoonacular.com/recipes/${recipe.title.replace(/\s+/g, '-').toLowerCase()}-${recipe.id}`
         };
       }));
 
       // Filter out recipes that don't use any of the selected ingredients
-      const filteredRecipes = newRecipes.filter(recipe => recipe.usedIngredients.length > 0);
+      const filteredApiRecipes = newRecipes.filter(recipe => recipe.usedIngredients.length > 0);
 
-      if (filteredRecipes.length === 0) {
+      // Generate a relevance score for hard-coded recipes based on matching ingredients
+      const relevantHardcodedRecipes = hardcodedRecipes.map(recipe => {
+        // Count how many selected ingredients are used in this recipe
+        const matchCount = selectedIngredients.reduce((count, selIng) => {
+          const isUsed = recipe.apiIngredients.some(apiIng =>
+            apiIng.includes(selIng.name) || selIng.name.includes(apiIng)
+          );
+          return isUsed ? count + 1 : count;
+        }, 0);
+
+        // If at least one ingredient matches, include this recipe
+        return { ...recipe, relevance: matchCount };
+      }).filter(recipe => recipe.relevance > 0);
+
+      // Combine API recipes with relevant hard-coded recipes
+      const combinedRecipes = [...filteredApiRecipes];
+
+      // Only add hard-coded recipes if there are fewer than 4 API recipes or if the user has no recipes
+      if (filteredApiRecipes.length === 0) {
+        // Show all hard-coded recipes if no API results
+        combinedRecipes.push(...hardcodedRecipes);
+      } else if (filteredApiRecipes.length < 4) {
+        // Add most relevant hard-coded recipes to fill the grid
+        const neededCount = 4 - filteredApiRecipes.length;
+        const sortedHardcodedRecipes = relevantHardcodedRecipes
+          .sort((a, b) => b.relevance - a.relevance)
+          .slice(0, neededCount);
+        combinedRecipes.push(...sortedHardcodedRecipes);
+      }
+
+      if (combinedRecipes.length === 0) {
         setError("No recipes found that use your selected ingredients.");
+        // Fallback to hard-coded recipes
+        setRecipes(hardcodedRecipes);
+        setApiRecipesLoaded(false);
       } else {
-        setRecipes(filteredRecipes);
+        setRecipes(combinedRecipes);
+        setApiRecipesLoaded(true);
       }
 
       setLoading(false);
     } catch (error) {
       console.error("Error fetching recipes:", error);
       setError(`Error retrieving recipes: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      // Show hard-coded recipes as fallback
+      setRecipes(hardcodedRecipes);
+      setApiRecipesLoaded(false);
       setLoading(false);
     }
   };
@@ -314,6 +442,16 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
         >
           {loading ? 'Searching...' : 'Find Recipes'}
         </button>
+
+        {/* Toggle between API and recommended recipes */}
+        {apiRecipesLoaded && (
+          <button
+            className="recipe-button secondary"
+            onClick={resetToHardcodedRecipes}
+          >
+            Show Recommended Recipes
+          </button>
+        )}
       </div>
 
       {error && <p className="error-message">{error}</p>}
@@ -380,7 +518,7 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
 
         {/* Column 3: Recipes - Now displaying in a 2x2 grid */}
         <div className="recipes-column">
-          <h3>Recipes</h3>
+          <h3>{apiRecipesLoaded ? 'Custom Recipes' : 'Recommended Recipes'}</h3>
           <div className="recipes-grid">
             {recipes.length > 0 ? (
               recipes.map((recipe) => (
@@ -404,7 +542,7 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
                   <div className="recipe-buttons">
                     <button
                       className="view-details-button"
-                      onClick={() => window.open(`https://spoonacular.com/recipes/${recipe.title.replace(/\s+/g, '-').toLowerCase()}-${recipe.id}`, '_blank')}
+                      onClick={() => window.open(recipe.link || `https://spoonacular.com/recipes/${recipe.title.replace(/\s+/g, '-').toLowerCase()}-${recipe.id}`, '_blank')}
                     >
                       View Full Recipe
                     </button>
