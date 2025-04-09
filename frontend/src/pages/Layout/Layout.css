@@ -1,0 +1,81 @@
+.homePage {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.header {
+    background-color: #f3f4e7;
+    height: 4rem;
+    /* Adjust as needed */
+    border-bottom: 2px solid #557b17;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+
+}
+
+.logo_div {
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+
+    &:hover {
+        cursor: pointer;
+    }
+
+}
+
+.logo_image {
+    height: 3.5rem;
+    padding-left: 1rem;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.tabs {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+
+}
+
+.tab_image {
+    height: 2rem;
+
+}
+
+.tab_div {
+    height: 4rem;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+
+    &:hover {
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(85, 123, 23, 0.5);
+        transform: translateY(-3px);
+    }
+
+}
+
+.main {
+    flex-grow: 1;
+    background-image: url('../../../public/letuce_background.png');
+    /* Replace with your image path */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+}

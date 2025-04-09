@@ -1,0 +1,70 @@
+.homeStack {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    height: 100vh;
+    /* Use viewport height instead of 100% */
+    padding: 4rem;
+    /* Add some padding */
+}
+
+.headline {
+    font-family: "Shrikhand", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 5rem;
+    /* Adjust as needed */
+    text-align: center;
+    margin-bottom: 2rem;
+
+    /* Space between text and images */
+}
+
+.stores {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    /* Reduced gap */
+    max-width: 100%;
+    /* Ensure it doesn't overflow the parent */
+    flex-wrap: wrap;
+    /* Allow wrapping if screen is too narrow */
+
+
+}
+
+.stores_image {
+    width: 150px;
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+    border-radius: 50%;
+    /* Add smooth transition for the shadow effect */
+
+    &:hover {
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        /* Add shadow on hover */
+        transform: translateY(-2px);
+        /* Optional: slight lift effect */
+    }
+}
+
+.stores_image img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    /* Maintain aspect ratio */
+}
+
+.shrikhand_regular {
+    font-family: "Shrikhand", serif;
+    font-weight: 400;
+    font-style: normal;
+}

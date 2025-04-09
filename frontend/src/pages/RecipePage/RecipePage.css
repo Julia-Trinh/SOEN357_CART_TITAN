@@ -1,0 +1,42 @@
+.bigDiv {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: #557b1754;
+    margin-top: 1rem;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.images {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stores_image {
+    max-width: 100px;
+    height: auto;
+    transition: all 0.3s ease;
+    border-radius: 50%;
+
+    &:hover {
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+}
+
+.filters {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    gap: 1rem;
+}
+
+.choice {
+    width: 350px;
+}

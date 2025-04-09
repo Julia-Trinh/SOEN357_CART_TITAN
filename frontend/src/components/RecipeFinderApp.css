@@ -1,0 +1,89 @@
+/* RecipeFinderApp.css */
+.app-container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.app-header {
+  text-align: center;
+  padding: 30px 0;
+  background-color: #f7f9f6;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.app-header h1 {
+  color: #54614c;
+  margin: 0 0 10px 0;
+}
+
+.app-header p {
+  color: #666;
+  margin: 0;
+}
+
+.loading, .error {
+  text-align: center;
+  padding: 50px 0;
+  background-color: #f7f9f6;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.error {
+  color: #d32f2f;
+}
+
+.store-stats {
+  background-color: #f7f9f6;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.store-stats h2 {
+  margin-top: 0;
+  color: #54614c;
+  text-align: center;
+}
+
+.store-selector {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.store-selector label {
+  margin-right: 10px;
+  font-weight: 500;
+}
+
+.store-selector select {
+  padding: 8px 15px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  background-color: white;
+  font-size: 16px;
+}
+
+.recommendation {
+  background-color: #e8ece0;
+  padding: 15px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.recommendation p {
+  margin: 0;
+}
+
+.app-footer {
+  text-align: center;
+  padding: 20px 0;
+  margin-top: 50px;
+  color: #666;
+  font-size: 14px;
+  border-top: 1px solid #eee;
+}
