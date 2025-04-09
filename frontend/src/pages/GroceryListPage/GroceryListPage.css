@@ -1,0 +1,121 @@
+/* GroceryListPage.css */
+.grocery-list-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.grocery-list-page h1 {
+  text-align: center;
+  color: #54614c;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.empty-list-message {
+  text-align: center;
+  padding: 40px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  color: #666;
+  font-size: 18px;
+}
+
+.grocery-controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.clear-list-button {
+  padding: 10px 20px;
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.clear-list-button:hover {
+  background-color: #b71c1c;
+}
+
+.grocery-items-container {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+
+.grocery-items {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.grocery-items th,
+.grocery-items td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.grocery-items th {
+  background-color: #f3f4e7;
+  color: #54614c;
+  font-weight: 600;
+}
+
+.grocery-items tr:last-child td {
+  border-bottom: none;
+}
+
+.grocery-items tfoot tr td {
+  border-top: 2px solid #ddd;
+  font-weight: bold;
+  background-color: #f9f9f9;
+}
+
+.remove-button {
+  padding: 6px 12px;
+  background-color: #ff5252;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.remove-button:hover {
+  background-color: #d50000;
+}
+
+@media (max-width: 768px) {
+  .grocery-items {
+    font-size: 14px;
+  }
+
+  .grocery-items th,
+  .grocery-items td {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .grocery-items {
+    font-size: 12px;
+  }
+
+  .grocery-items th,
+  .grocery-items td {
+    padding: 8px 5px;
+  }
+
+  .remove-button {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}

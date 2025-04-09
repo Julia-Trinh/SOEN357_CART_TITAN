@@ -15,7 +15,26 @@
   padding-bottom: 15px;
   border-bottom: 1px solid #ddd;
 }
+.recipe-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+}
+.add-to-grocery-button {
+  padding: 12px;
+  background-color: #5a9547; /* Green color to distinguish from view recipe button */
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
 
+.add-to-grocery-button:hover {
+  background-color: #4c7e3a;
+}
 .filters {
   display: flex;
   justify-content: center;
@@ -175,16 +194,19 @@
   border-bottom: 1px solid #e0e0e0;
 }
 
-.recipes-list {
+.recipes-grid {
   padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 2 columns */
+  grid-gap: 20px;
   max-height: 800px;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
 }
 
 .recipe-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   border: 1px solid #e0e0e0;
   border-radius: 10px;
   overflow: hidden;
@@ -292,13 +314,15 @@
   }
 }
 
-@media (max-width: 768px) {
-  .ingredients-container {
-    grid-template-columns: 1fr;
+@media (max-width: 1200px) {
+  .recipes-grid {
+    grid-template-columns: 1fr 1fr;
   }
+}
 
-  .selected-ingredients-container {
-    grid-column: 1;
+@media (max-width: 768px) {
+  .recipes-grid {
+    grid-template-columns: 1fr; /* Single column on small screens */
   }
 }
 

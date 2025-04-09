@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Ingredient from '../interface/Ingredient';
 import Recipe from '../interface/Recipe';
 import './RecipeComponent.css';
@@ -12,12 +13,15 @@ interface MarketItem {
 interface RecipeComponentProps {
   marketData?: Record<string, number>;
   apiKey?: string;
+  updateGroceryList?: (ingredients: Ingredient[]) => void;
 }
 
 const RecipeComponent: React.FC<RecipeComponentProps> = ({
   marketData = {},
-  apiKey = "34a7dac016c6479c9c30c16be772b3d8" // Use env variable in production
+  apiKey = "34a7dac016c6479c9c30c16be772b3d8", // Use env variable in production
+  updateGroceryList
 }) => {
+  const navigate = useNavigate();
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [marketItems, setMarketItems] = useState<MarketItem[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -119,6 +123,40 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
       }
       // Otherwise add it to selected ingredients
       return [...prev, ingredient];
+    });
+  };
+
+  // Add missing ingredients to grocery list
+  const addToGroceryList = (recipe: Recipe) => {
+    // Extract ingredients that are needed but not in home ingredients
+    const missingIngredients = recipe.missedIngredients.filter(ingName =>
+      !homeIngredients.some(homeIng => homeIng.toLowerCase() === ingName.toLowerCase())
+    );
+
+    // Convert to Ingredient objects with costs if available from market
+    const missingIngredientsFormatted = missingIngredients.map(ingName => {
+      const marketItem = marketItems.find(item =>
+        item.name.includes(ingName.toLowerCase()) ||
+        ingName.toLowerCase().includes(item.name)
+      );
+
+      return {
+        name: ingName.toLowerCase(),
+        cost: marketItem ? marketItem.price : 0
+      };
+    });
+
+    // If we have a callback to update the grocery list, use it
+    if (updateGroceryList) {
+      updateGroceryList(missingIngredientsFormatted);
+    }
+
+    // Navigate to the grocery list page
+    navigate('/grocery', {
+      state: {
+        ingredients: missingIngredientsFormatted,
+        recipeName: recipe.title
+      }
     });
   };
 
@@ -340,10 +378,10 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
           </div>
         </div>
 
-        {/* Column 3: Recipes */}
+        {/* Column 3: Recipes - Now displaying in a 2x2 grid */}
         <div className="recipes-column">
           <h3>Recipes</h3>
-          <div className="recipes-list">
+          <div className="recipes-grid">
             {recipes.length > 0 ? (
               recipes.map((recipe) => (
                 <div key={recipe.id} className="recipe-card">
@@ -363,12 +401,21 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
                     </div>
                   </div>
 
-                  <button
-                    className="view-details-button"
-                    onClick={() => window.open(`https://spoonacular.com/recipes/${recipe.title.replace(/\s+/g, '-').toLowerCase()}-${recipe.id}`, '_blank')}
-                  >
-                    View Full Recipe
-                  </button>
+                  <div className="recipe-buttons">
+                    <button
+                      className="view-details-button"
+                      onClick={() => window.open(`https://spoonacular.com/recipes/${recipe.title.replace(/\s+/g, '-').toLowerCase()}-${recipe.id}`, '_blank')}
+                    >
+                      View Full Recipe
+                    </button>
+
+                    <button
+                      className="add-to-grocery-button"
+                      onClick={() => addToGroceryList(recipe)}
+                    >
+                      Add to Grocery List
+                    </button>
+                  </div>
                 </div>
               ))
             ) : (
