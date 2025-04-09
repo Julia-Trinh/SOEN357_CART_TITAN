@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Ingredient from '../interface/Ingredient';
 import Recipe from '../interface/Recipe';
+import IngredientsPanel from './IngredientsPanel.tsx';
+import RecipesList from './RecipeList.tsx';
+import FilterControls from './FilterControl.tsx';
+import { hardcodedRecipes } from './hardcodedRecipes.ts';
 import './RecipeComponent.css';
 
 interface MarketItem {
@@ -29,99 +33,18 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'sale'>('sale');
   const [selectedIngredients, setSelectedIngredients] = useState<Ingredient[]>([]);
-  const [debugMode, setDebugMode] = useState<boolean>(false);
   const [apiRecipesLoaded, setApiRecipesLoaded] = useState<boolean>(false);
+  const [selectedAllergy, setSelectedAllergy] = useState<string>('None');
+  const [selectedDiet, setSelectedDiet] = useState<string>('None');
 
   // Home ingredients list
   const homeIngredients = [
-    'Apple',
-    'Lemon',
-    'Lettuce',
-    'Tomato',
-    'Cucumber',
-    'Chicken Breast',
-    'Garlic',
-    'Onion',
-    'Olive Oil',
-    'Cheese'
-  ];
-
-  // Hard-coded recipes with common ingredients
-  const hardcodedRecipes: Recipe[] = [
-    {
-      id: "hc001",
-      title: "Quick Chicken Stir Fry",
-      img: "https://www.simplyrecipes.com/thmb/YSlSLYrnOBfHOGOYMnN8l_eUFzs=/2000x1125/filters:no_upscale():max_bytes(150000):strip_icc()/Simply-Recipes-Chicken-Stir-Fry-LEAD-6-47b5da1a92b644be86918c528169f059.jpg",
-      cost: 12.75,
-      content: "1. Slice chicken into thin strips. 2. Chop vegetables. 3. Stir-fry chicken until cooked through. 4. Add vegetables and sauté. 5. Add sauce and toss to coat.",
-      usedIngredients: [
-        { name: "chicken breast", cost: 7.99 },
-        { name: "onion", cost: 0.79 },
-        { name: "garlic", cost: 0.49 },
-        { name: "olive oil", cost: 0 },
-      ],
-      missedIngredients: ["bell pepper", "broccoli", "soy sauce", "ginger", "sesame oil"],
-      apiIngredients: ["chicken breast", "onion", "garlic", "olive oil", "bell pepper", "broccoli", "soy sauce", "ginger", "sesame oil"],
-      link: "https://www.simplyrecipes.com/recipes/quick_easy_chicken_stir_fry/"
-    },
-    {
-      id: "hc002",
-      title: "Classic Caesar Salad",
-      img: "https://www.seriouseats.com/thmb/Fi_FEyVa3_-_uzfXiCZ0ShYwht8=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/__opt__aboutcom__coeus__resources__content_migration__serious_eats__seriouseats.com__recipes__images__2013__10__20131009-caesar-salad-how-17-66824dc8c0a8453293b0b8c74cdad20d.jpg",
-      cost: 8.25,
-      content: "1. Wash and tear romaine lettuce. 2. Make dressing with egg, garlic, anchovy paste, lemon juice, and olive oil. 3. Toast bread for croutons. 4. Toss lettuce with dressing and top with parmesan.",
-      usedIngredients: [
-        { name: "lettuce", cost: 2.49 },
-        { name: "garlic", cost: 0.49 },
-        { name: "lemon", cost: 0.79 },
-        { name: "olive oil", cost: 0 },
-        { name: "cheese", cost: 3.99 }
-      ],
-      missedIngredients: ["anchovy paste", "eggs", "crusty bread"],
-      apiIngredients: ["romaine lettuce", "garlic", "lemon", "olive oil", "parmesan cheese", "anchovy paste", "eggs", "bread"],
-      link: "https://www.seriouseats.com/the-best-caesar-salad-recipe"
-    },
-    {
-      id: "hc003",
-      title: "Mediterranean Cucumber Tomato Salad",
-      img: "https://www.acouplecooks.com/wp-content/uploads/2021/07/Cucumber-Tomato-Onion-Salad-007.jpg",
-      cost: 7.50,
-      content: "1. Dice cucumber, tomato, and red onion. 2. Mix with olives and feta cheese. 3. Dress with olive oil, lemon juice, salt, and herbs.",
-      usedIngredients: [
-        { name: "cucumber", cost: 1.29 },
-        { name: "tomato", cost: 1.99 },
-        { name: "onion", cost: 0.79 },
-        { name: "lemon", cost: 0.79 },
-        { name: "olive oil", cost: 0 },
-        { name: "cheese", cost: 3.99 }
-      ],
-      missedIngredients: ["kalamata olives", "fresh herbs"],
-      apiIngredients: ["cucumber", "tomato", "red onion", "lemon", "olive oil", "feta cheese", "kalamata olives", "fresh herbs"],
-      link: "https://www.acouplecooks.com/cucumber-tomato-onion-salad/"
-    },
-    {
-      id: "hc004",
-      title: "Simple Roast Chicken with Vegetables",
-      img: "https://www.wellplated.com/wp-content/uploads/2020/12/Baked-Chicken-and-Vegetables-recipe.jpg",
-      cost: 11.99,
-      content: "1. Season chicken with herbs, salt, and pepper. 2. Arrange vegetables around chicken in roasting pan. 3. Drizzle with olive oil. 4. Roast at 425°F until chicken is cooked through and vegetables are tender.",
-      usedIngredients: [
-        { name: "chicken breast", cost: 7.99 },
-        { name: "garlic", cost: 0.49 },
-        { name: "onion", cost: 0.79 },
-        { name: "olive oil", cost: 0 },
-        { name: "lemon", cost: 0.79 },
-        { name: "apple", cost: 1.99 }
-      ],
-      missedIngredients: ["potatoes", "carrots", "rosemary", "thyme"],
-      apiIngredients: ["chicken breast", "garlic", "onion", "olive oil", "lemon", "apple", "potatoes", "carrots", "rosemary", "thyme"],
-      link: "https://www.wellplated.com/roasted-chicken-and-vegetables/"
-    }
+    'Apple', 'Lemon', 'Lettuce', 'Tomato', 'Cucumber',
+    'Chicken Breast', 'Garlic', 'Onion', 'Olive Oil', 'Cheese'
   ];
 
   // Initialize with hard-coded recipes on component mount
   useEffect(() => {
-    // Only set hard-coded recipes initially if no recipes are loaded yet
     if (recipes.length === 0) {
       setRecipes(hardcodedRecipes);
     }
@@ -137,7 +60,6 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
   useEffect(() => {
     if (Object.keys(marketData).length > 0) {
       const processedItems = Object.entries(marketData as Record<string, number>).map(([name, price]) => {
-        // Now TypeScript knows price is a number because Record<string, number> was specified
         const onSale = price < 5.00;
         return { name: normalizeItemName(name), price, onSale };
       });
@@ -188,11 +110,6 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
   // Format ingredients for API call
   const formatIngredients = (ingredients: Ingredient[]): string => {
     return ingredients.map(ing => ing.name).join(",+");
-  };
-
-  // Calculate total cost based on used ingredients
-  const calculateTotalCost = (usedIngredients: Ingredient[]): number => {
-    return usedIngredients.reduce((sum, ing) => sum + ing.cost, 0);
   };
 
   // Handle clicking on an ingredient to select/deselect it
@@ -305,7 +222,45 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
     setRecipes(hardcodedRecipes);
   };
 
-  // Fetch recipes from API
+  // Check if a recipe meets dietary preferences
+  const matchesDietaryPreferences = (recipe: Recipe): boolean => {
+    // If no preferences selected, show all recipes
+    if (selectedAllergy === 'None' && selectedDiet === 'None') {
+      return true;
+    }
+
+    // Filter by allergies
+    if (selectedAllergy !== 'None') {
+      // Check if recipe contains selected allergen
+      if (recipe.allergens && recipe.allergens.includes(selectedAllergy.toLowerCase())) {
+        return false;
+      }
+    }
+
+    // Filter by dietary preference
+    if (selectedDiet !== 'None') {
+      // For API recipes without diet info, make best guess
+      if (!recipe.diet) {
+        // For vegan/vegetarian, check for common animal products
+        if (selectedDiet.toLowerCase() === 'vegetarian') {
+          const meatIngredients = ['chicken', 'beef', 'pork', 'meat', 'fish', 'seafood'];
+          if (recipe.apiIngredients && recipe.apiIngredients.some(ing =>
+            meatIngredients.some(meat => ing.includes(meat)))) {
+            return false;
+          }
+        }
+        // For API recipes, we can't reliably determine other diets
+        return true;
+      }
+
+      // For hardcoded recipes with diet info
+      return recipe.diet && recipe.diet.includes(selectedDiet.toLowerCase());
+    }
+
+    return true;
+  };
+
+  // Enhanced fetchRecipes function to integrate hardcoded and API recipes better
   const fetchRecipes = async () => {
     setError(null);
     setLoading(true);
@@ -316,6 +271,32 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
       return;
     }
 
+    // Always evaluate hardcoded recipes based on selected ingredients
+    const relevantHardcodedRecipes = hardcodedRecipes.map(recipe => {
+      // Count how many selected ingredients are used in this recipe
+      const matchedIngredients: Ingredient[] = [];
+      let totalRelevance = 0;
+
+      selectedIngredients.forEach(selIng => {
+        const matchFound = recipe.apiIngredients.some(apiIng =>
+          apiIng.includes(selIng.name) || selIng.name.includes(apiIng)
+        );
+
+        if (matchFound) {
+          totalRelevance++;
+          matchedIngredients.push(selIng);
+        }
+      });
+
+      // Create a new recipe object with matched ingredients
+      return {
+        ...recipe,
+        relevance: totalRelevance,
+        usedIngredients: matchedIngredients
+      };
+    }).filter(recipe => recipe.relevance > 0 && matchesDietaryPreferences(recipe));
+
+    // Fetch API recipes
     const formattedIngredients = formatIngredients(selectedIngredients);
     const ranking = 2; // Option 2 maximizes used ingredients
     const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${formattedIngredients}&number=4&ranking=${ranking}&apiKey=${apiKey}`;
@@ -329,91 +310,90 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
 
       const data = await response.json();
 
+      // Handle the case when no API recipes are found
       if (!data || data.length === 0) {
-        // If no API recipes found, just show hard-coded recipes
-        setRecipes(hardcodedRecipes);
+        // Show filtered hardcoded recipes based on matching and dietary preferences
+        if (relevantHardcodedRecipes.length > 0) {
+          setRecipes(relevantHardcodedRecipes.sort((a, b) => b.relevance - a.relevance));
+        } else {
+          // Filter hardcoded recipes just by dietary preferences if no ingredient matches
+          const dietFilteredRecipes = hardcodedRecipes.filter(recipe => matchesDietaryPreferences(recipe));
+          setRecipes(dietFilteredRecipes.length > 0 ? dietFilteredRecipes : hardcodedRecipes);
+        }
         setApiRecipesLoaded(false);
         setLoading(false);
         return;
       }
 
-      const newRecipes = await Promise.all(data.map(async (recipe: any) => {
+      const apiRecipes = await Promise.all(data.map(async (recipe: any) => {
         const details = await getRecipeDetails(recipe.id.toString());
-
-        // Only include recipes that actually use at least one of our selected ingredients
-        if (details.usedIngredients.length === 0) {
-          if (debugMode) {
-            console.log(`Recipe ${recipe.title} doesn't use any selected ingredients`);
-            console.log('API ingredients:', details.apiIngredients);
-            console.log('Selected ingredients:', selectedIngredients.map(ing => ing.name));
-          }
-        }
 
         return {
           id: recipe.id,
           title: recipe.title,
-          img: recipe.image,
+          img: recipe.image || "https://via.placeholder.com/300", // Fallback image
           cost: calculateTotalCost(details.usedIngredients),
           content: details.instructions,
           usedIngredients: details.usedIngredients,
           missedIngredients: recipe.missedIngredients.map((ingredient: any) => ingredient.name),
           apiIngredients: details.apiIngredients,
-          link: `https://spoonacular.com/recipes/${recipe.title.replace(/\s+/g, '-').toLowerCase()}-${recipe.id}`
+          link: `https://spoonacular.com/recipes/${recipe.title.replace(/\s+/g, '-').toLowerCase()}-${recipe.id}`,
+          // For API recipes, we don't have explicit allergen/diet info
+          allergens: [],
+          diet: []
         };
       }));
 
-      // Filter out recipes that don't use any of the selected ingredients
-      const filteredApiRecipes = newRecipes.filter(recipe => recipe.usedIngredients.length > 0);
+      // Filter API recipes that actually use at least one selected ingredient
+      const filteredApiRecipes = apiRecipes
+        .filter(recipe => recipe.usedIngredients.length > 0)
+        .filter(matchesDietaryPreferences);
 
-      // Generate a relevance score for hard-coded recipes based on matching ingredients
-      const relevantHardcodedRecipes = hardcodedRecipes.map(recipe => {
-        // Count how many selected ingredients are used in this recipe
-        const matchCount = selectedIngredients.reduce((count, selIng) => {
-          const isUsed = recipe.apiIngredients.some(apiIng =>
-            apiIng.includes(selIng.name) || selIng.name.includes(apiIng)
-          );
-          return isUsed ? count + 1 : count;
-        }, 0);
+      // Combine both recipe sources
+      let combinedRecipes = [...filteredApiRecipes];
 
-        // If at least one ingredient matches, include this recipe
-        return { ...recipe, relevance: matchCount };
-      }).filter(recipe => recipe.relevance > 0);
-
-      // Combine API recipes with relevant hard-coded recipes
-      const combinedRecipes = [...filteredApiRecipes];
-
-      // Only add hard-coded recipes if there are fewer than 4 API recipes or if the user has no recipes
-      if (filteredApiRecipes.length === 0) {
-        // Show all hard-coded recipes if no API results
-        combinedRecipes.push(...hardcodedRecipes);
-      } else if (filteredApiRecipes.length < 4) {
-        // Add most relevant hard-coded recipes to fill the grid
-        const neededCount = 4 - filteredApiRecipes.length;
+      // Add hardcoded recipes that match ingredients if we don't have enough API recipes
+      if (filteredApiRecipes.length < 4 && relevantHardcodedRecipes.length > 0) {
+        // Sort hardcoded recipes by relevance
         const sortedHardcodedRecipes = relevantHardcodedRecipes
           .sort((a, b) => b.relevance - a.relevance)
-          .slice(0, neededCount);
-        combinedRecipes.push(...sortedHardcodedRecipes);
+          .slice(0, 4 - filteredApiRecipes.length);
+
+        combinedRecipes = [...filteredApiRecipes, ...sortedHardcodedRecipes];
       }
 
+      // If we still have fewer than 4 recipes, add any hardcoded recipe that meets dietary preferences
       if (combinedRecipes.length === 0) {
-        setError("No recipes found that use your selected ingredients.");
-        // Fallback to hard-coded recipes
-        setRecipes(hardcodedRecipes);
+        const dietaryFilteredRecipes = hardcodedRecipes.filter(matchesDietaryPreferences);
+        combinedRecipes = dietaryFilteredRecipes.length > 0 ? dietaryFilteredRecipes : hardcodedRecipes;
         setApiRecipesLoaded(false);
       } else {
-        setRecipes(combinedRecipes);
-        setApiRecipesLoaded(true);
+        setApiRecipesLoaded(filteredApiRecipes.length > 0);
       }
 
+      setRecipes(combinedRecipes);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching recipes:", error);
       setError(`Error retrieving recipes: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      // Show hard-coded recipes as fallback
-      setRecipes(hardcodedRecipes);
+
+      // Use filtered hardcoded recipes as fallback
+      if (relevantHardcodedRecipes.length > 0) {
+        setRecipes(relevantHardcodedRecipes.sort((a, b) => b.relevance - a.relevance));
+      } else {
+        // If no relevant hardcoded recipes, just filter by dietary preferences
+        const dietFilteredRecipes = hardcodedRecipes.filter(matchesDietaryPreferences);
+        setRecipes(dietFilteredRecipes.length > 0 ? dietFilteredRecipes : hardcodedRecipes);
+      }
+
       setApiRecipesLoaded(false);
       setLoading(false);
     }
+  };
+
+  // Calculate total cost based on used ingredients
+  const calculateTotalCost = (usedIngredients: Ingredient[]): number => {
+    return usedIngredients.reduce((sum, ing) => sum + ing.cost, 0);
   };
 
   // Check if an ingredient is selected
@@ -425,142 +405,36 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
     <div className="recipe-container">
       <h1>Weekly Special Recipes</h1>
 
-      <div className="filters">
-        <select
-          value={selectedFilter}
-          onChange={(e) => setSelectedFilter(e.target.value as 'all' | 'sale')}
-          className="filter-select"
-        >
-          <option value="sale">On Sale Items</option>
-          <option value="all">All Items</option>
-        </select>
-
-        <button
-          onClick={fetchRecipes}
-          className="recipe-button"
-          disabled={loading || selectedIngredients.length === 0}
-        >
-          {loading ? 'Searching...' : 'Find Recipes'}
-        </button>
-
-        {/* Toggle between API and recommended recipes */}
-        {apiRecipesLoaded && (
-          <button
-            className="recipe-button secondary"
-            onClick={resetToHardcodedRecipes}
-          >
-            Show Recommended Recipes
-          </button>
-        )}
-      </div>
+      <FilterControls
+        selectedFilter={selectedFilter}
+        setSelectedFilter={setSelectedFilter}
+        selectedAllergy={selectedAllergy}
+        setSelectedAllergy={setSelectedAllergy}
+        selectedDiet={selectedDiet}
+        setSelectedDiet={setSelectedDiet}
+        fetchRecipes={fetchRecipes}
+        loading={loading}
+        apiRecipesLoaded={apiRecipesLoaded}
+        resetToHardcodedRecipes={resetToHardcodedRecipes}
+        selectedIngredientsCount={selectedIngredients.length}
+      />
 
       {error && <p className="error-message">{error}</p>}
 
-      {/* Main grid layout */}
       <div className="main-grid">
-        {/* Ingredient Columns Container */}
-        <div className="ingredients-container">
-          {/* Column 1: Market Ingredients */}
-          <div className="ingredient-column market-column">
-            <h3>Market Ingredients ({ingredients.length})</h3>
-            <div className="ingredient-list">
-              {ingredients.map((ingredient, index) => (
-                <div
-                  key={index}
-                  className={`ingredient-item ${isIngredientSelected(ingredient) ? 'selected' : ''}`}
-                  onClick={() => handleIngredientClick(ingredient)}
-                >
-                  <span className="ingredient-icon">🥕</span>
-                  <span className="ingredient-name">{ingredient.name} - ${ingredient.cost.toFixed(2)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+        <IngredientsPanel
+          ingredients={ingredients}
+          homeIngredients={homeIngredientsFormatted}
+          selectedIngredients={selectedIngredients}
+          handleIngredientClick={handleIngredientClick}
+          isIngredientSelected={isIngredientSelected}
+        />
 
-          {/* Column 2: Home Ingredients */}
-          <div className="ingredient-column home-column">
-            <h3>Home Ingredients ({homeIngredients.length})</h3>
-            <div className="ingredient-list">
-              {homeIngredientsFormatted.map((ingredient, index) => (
-                <div
-                  key={index}
-                  className={`ingredient-item ${isIngredientSelected(ingredient) ? 'selected' : ''}`}
-                  onClick={() => handleIngredientClick(ingredient)}
-                >
-                  <span className="ingredient-icon">🥕</span>
-                  <span className="ingredient-name">{ingredient.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Selected Ingredients - Spans both columns */}
-          <div className="selected-ingredients-container">
-            <h3>Selected Ingredients ({selectedIngredients.length})</h3>
-            <div className="selected-ingredients-list">
-              {selectedIngredients.length > 0 ? (
-                selectedIngredients.map((ingredient, index) => (
-                  <div
-                    key={index}
-                    className="selected-ingredient"
-                    onClick={() => handleIngredientClick(ingredient)}
-                  >
-                    {ingredient.name}
-                    {ingredient.cost > 0 && ` - $${ingredient.cost.toFixed(2)}`}
-                  </div>
-                ))
-              ) : (
-                <p>No ingredients selected yet. Click on ingredients to select them.</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Column 3: Recipes - Now displaying in a 2x2 grid */}
-        <div className="recipes-column">
-          <h3>{apiRecipesLoaded ? 'Custom Recipes' : 'Recommended Recipes'}</h3>
-          <div className="recipes-grid">
-            {recipes.length > 0 ? (
-              recipes.map((recipe) => (
-                <div key={recipe.id} className="recipe-card">
-                  <h3>{recipe.title}</h3>
-                  <img src={recipe.img} alt={recipe.title} />
-                  <h3 className="recipe-cost">${recipe.cost.toFixed(2)}</h3>
-
-                  <div className="used-ingredients">
-                    <h4>Selected Items Used:</h4>
-                    <div className="ingredient-tags">
-                      {recipe.usedIngredients.map((ingredient, index) => (
-                        <div key={index} className="ing">
-                          <p>{ingredient.name}{ingredient.cost > 0 ? ` - $${ingredient.cost.toFixed(2)}` : ''}</p>
-                        </div>
-                      ))}
-                      {recipe.usedIngredients.length === 0 && <p>No selected items used</p>}
-                    </div>
-                  </div>
-
-                  <div className="recipe-buttons">
-                    <button
-                      className="view-details-button"
-                      onClick={() => window.open(recipe.link || `https://spoonacular.com/recipes/${recipe.title.replace(/\s+/g, '-').toLowerCase()}-${recipe.id}`, '_blank')}
-                    >
-                      View Full Recipe
-                    </button>
-
-                    <button
-                      className="add-to-grocery-button"
-                      onClick={() => addToGroceryList(recipe)}
-                    >
-                      Add to Grocery List
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="no-results">Select ingredients and click "Find Recipes" to discover meals</p>
-            )}
-          </div>
-        </div>
+        <RecipesList
+          recipes={recipes}
+          apiRecipesLoaded={apiRecipesLoaded}
+          addToGroceryList={addToGroceryList}
+        />
       </div>
 
       <footer className="recipe-footer">

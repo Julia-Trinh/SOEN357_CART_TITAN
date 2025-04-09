@@ -22,26 +22,6 @@ function RecipePage() {
           <img src="/superC.png" alt="Super C" className="stores_image" onClick={() => { setStoreChoice("superC") }} />
           <img src="/iga.png" alt="IGA" className="stores_image" onClick={() => { setStoreChoice("iga") }} />
         </div>
-        <div className="filters">
-          <div className="choice">
-            <Select
-              label="Dietary Choice"
-              placeholder="you filter by dieterry choice"
-              data={['vegan', 'vegeterian', 'pescatarian', 'keto', 'paleo']}
-              value={dietaryChoices}
-              onChange={setDietaryChoices}
-            />
-          </div>
-          <div className="choice">
-            <MultiSelect
-              label="Allergies and/or Intolerances"
-              placeholder="you can exclude ingredients from the search"
-              data={['peanuts', 'soy', 'honey', 'sesame', 'gluten', 'dairy']}
-              value={allergies}
-              onChange={setAllergies}
-            />
-          </div>
-        </div>
       </div>
       < RecipeFinderApp />
     </>

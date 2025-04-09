@@ -16,13 +16,40 @@ function GroceryListPage() {
   const location = useLocation();
   const [groceryList, setGroceryList] = useState<Ingredient[]>([]);
   const [recipeSources, setRecipeSources] = useState<Record<string, string[]>>({});
+  const [hasProcessedNavState, setHasProcessedNavState] = useState(false);
+  const [buttonStates, setButtonStates] = useState<Record<number, string>>({});
 
   useEffect(() => {
-    // Check if we have ingredients from navigation state
-    if (location.state) {
+    const savedList = localStorage.getItem('groceryList');
+    const savedSources = localStorage.getItem('recipeSources');
+
+    let initialList: Ingredient[] = [];
+    let initialSources: Record<string, string[]> = {};
+
+    if (savedList) {
+      try {
+        initialList = JSON.parse(savedList);
+      } catch (e) {
+        console.error('Error parsing saved grocery list:', e);
+      }
+    }
+
+    if (savedSources) {
+      try {
+        initialSources = JSON.parse(savedSources);
+      } catch (e) {
+        console.error('Error parsing saved recipe sources:', e);
+      }
+    }
+
+    setGroceryList(initialList);
+    setRecipeSources(initialSources);
+  }, []);
+
+  useEffect(() => {
+    if (location.state && !hasProcessedNavState) {
       const { ingredients, recipeName } = location.state as LocationState;
 
-      // Add new ingredients to the list without duplicates
       setGroceryList(prevList => {
         const updatedList = [...prevList];
 
@@ -32,7 +59,6 @@ function GroceryListPage() {
           );
 
           if (existingItemIndex === -1) {
-            // Item doesn't exist, add it
             updatedList.push(newItem);
           }
         });
@@ -40,10 +66,10 @@ function GroceryListPage() {
         return updatedList;
       });
 
-      // Track which recipe each ingredient came from
       if (recipeName) {
         setRecipeSources(prevSources => {
-          const updatedSources = {...prevSources};
+          const updatedSources = { ...prevSources };
+
           ingredients.forEach(ingredient => {
             const name = ingredient.name.toLowerCase();
             if (!updatedSources[name]) {
@@ -53,57 +79,40 @@ function GroceryListPage() {
               updatedSources[name].push(recipeName);
             }
           });
+
           return updatedSources;
         });
       }
-    }
 
-    // Load saved grocery list from localStorage
-    const savedList = localStorage.getItem('groceryList');
-    if (savedList && !location.state) {
-      try {
-        const parsedList = JSON.parse(savedList);
-        setGroceryList(parsedList);
-      } catch (e) {
-        console.error('Error parsing saved grocery list:', e);
-      }
+      setHasProcessedNavState(true);
     }
+  }, [location.state, hasProcessedNavState]);
 
-    const savedSources = localStorage.getItem('recipeSources');
-    if (savedSources && !location.state) {
-      try {
-        const parsedSources = JSON.parse(savedSources);
-        setRecipeSources(parsedSources);
-      } catch (e) {
-        console.error('Error parsing saved recipe sources:', e);
-      }
-    }
-  }, [location.state]);
-
-  // Save grocery list to localStorage whenever it changes
   useEffect(() => {
     if (groceryList.length > 0) {
       localStorage.setItem('groceryList', JSON.stringify(groceryList));
+    } else {
+      localStorage.removeItem('groceryList');
     }
 
     if (Object.keys(recipeSources).length > 0) {
       localStorage.setItem('recipeSources', JSON.stringify(recipeSources));
+    } else {
+      localStorage.removeItem('recipeSources');
     }
   }, [groceryList, recipeSources]);
 
   const removeItem = (index: number) => {
     setGroceryList(prevList => {
       const updatedList = [...prevList];
-      // Remove the item's recipe sources
       const removedItem = updatedList[index];
       if (removedItem) {
         setRecipeSources(prevSources => {
-          const updatedSources = {...prevSources};
+          const updatedSources = { ...prevSources };
           delete updatedSources[removedItem.name.toLowerCase()];
           return updatedSources;
         });
       }
-      // Remove the item from the list
       updatedList.splice(index, 1);
       return updatedList;
     });
@@ -112,8 +121,14 @@ function GroceryListPage() {
   const clearList = () => {
     setGroceryList([]);
     setRecipeSources({});
-    localStorage.removeItem('groceryList');
-    localStorage.removeItem('recipeSources');
+  };
+
+  const toggleButtonState = (index: number) => {
+    setButtonStates(prevStates => {
+      const updatedStates = { ...prevStates };
+      updatedStates[index] = updatedStates[index] === 'No' ? 'Yes' : 'No';
+      return updatedStates;
+    });
   };
 
   return (
@@ -137,7 +152,9 @@ function GroceryListPage() {
                   <th>Ingredient</th>
                   <th>Price</th>
                   <th>Recipe Source</th>
+                  <th>Purchased?</th>
                   <th>Action</th>
+
                 </tr>
               </thead>
               <tbody>
@@ -150,14 +167,22 @@ function GroceryListPage() {
                         recipeSources[item.name.toLowerCase()].join(', ') :
                         'Added manually'}
                     </td>
+                    <td> <button
+                        className="purchase-button"
+                        onClick={() => toggleButtonState(index)}
+                      >
+                        {buttonStates[index] || 'No'}
+                      </button>
+                    </td>
                     <td>
                       <button
                         className="remove-button"
                         onClick={() => removeItem(index)}
                       >
-                        Remove
+                        Delete
                       </button>
                     </td>
+
                   </tr>
                 ))}
               </tbody>

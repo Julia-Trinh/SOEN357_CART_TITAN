@@ -71,6 +71,8 @@
 .main {
     flex-grow: 1;
     background-image: url('../../../public/letuce_background.png');
+
+    /*background-color: #baf2a2;*/
     /* Replace with your image path */
     background-size: cover;
     background-position: center;

@@ -1,7 +1,8 @@
 .bigDiv {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+ align-items: center;
+    justify-content: center;
     background-color: #557b1754;
     margin-top: 1rem;
     border-radius: 10px;
@@ -11,7 +12,7 @@
 .images {
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: center;
     align-items: center;
     gap: 1rem;
 }
@@ -27,14 +28,6 @@
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         transform: translateY(-2px);
     }
-}
-
-.filters {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
-    gap: 1rem;
 }
 
 .choice {
