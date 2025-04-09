@@ -17,7 +17,7 @@ function GroceryListPage() {
   const [groceryList, setGroceryList] = useState<Ingredient[]>([]);
   const [recipeSources, setRecipeSources] = useState<Record<string, string[]>>({});
   const [hasProcessedNavState, setHasProcessedNavState] = useState(false);
-  const [buttonStates, setButtonStates] = useState<Record<number, string>>({});
+  const [checkedItems, setCheckedItems] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     const savedList = localStorage.getItem('groceryList');
@@ -123,12 +123,19 @@ function GroceryListPage() {
     setRecipeSources({});
   };
 
-  const toggleButtonState = (index: number) => {
-    setButtonStates(prevStates => {
-      const updatedStates = { ...prevStates };
-      updatedStates[index] = updatedStates[index] === 'No' ? 'Yes' : 'No';
-      return updatedStates;
-    });
+  const handleCheckboxChange = (index: number) => {
+    setCheckedItems(prevState => ({
+      ...prevState,
+      [index]: !prevState[index], // Toggle the checkbox state
+    }));
+  };
+
+  // Calculate the total excluding checked (purchased) items
+  const calculateTotal = () => {
+    return groceryList
+      .filter((_, index) => !checkedItems[index]) // Only include unchecked items
+      .reduce((total, item) => total + (item.cost || 0), 0)
+      .toFixed(2);
   };
 
   return (
@@ -154,7 +161,6 @@ function GroceryListPage() {
                   <th>Recipe Source</th>
                   <th>Purchased?</th>
                   <th>Action</th>
-
                 </tr>
               </thead>
               <tbody>
@@ -167,12 +173,13 @@ function GroceryListPage() {
                         recipeSources[item.name.toLowerCase()].join(', ') :
                         'Added manually'}
                     </td>
-                    <td> <button
-                        className="purchase-button"
-                        onClick={() => toggleButtonState(index)}
-                      >
-                        {buttonStates[index] || 'No'}
-                      </button>
+                    <td>
+                      <input
+                          className="purchase-button"
+                        type="checkbox"
+                        checked={checkedItems[index] || false}
+                        onChange={() => handleCheckboxChange(index)}
+                      />
                     </td>
                     <td>
                       <button
@@ -182,7 +189,6 @@ function GroceryListPage() {
                         Delete
                       </button>
                     </td>
-
                   </tr>
                 ))}
               </tbody>
@@ -190,7 +196,7 @@ function GroceryListPage() {
                 <tr>
                   <td colSpan={2}>Total Estimated Cost:</td>
                   <td colSpan={2}>
-                    ${groceryList.reduce((total, item) => total + (item.cost || 0), 0).toFixed(2)}
+                    ${calculateTotal()}
                   </td>
                 </tr>
               </tfoot>

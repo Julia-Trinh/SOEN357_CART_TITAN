@@ -89,7 +89,7 @@
   transition: background-color 0.2s;
 }
 
-.remove-button:hover,.purchase-button:hover {
+.remove-button:hover{
   background-color: #d50000;
 }
 
@@ -101,7 +101,8 @@
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.2s;
-  margin-left: 20px;
+  margin-left: 35px;
+  transform: scale(1.5);
 }
 
 @media (max-width: 768px) {
