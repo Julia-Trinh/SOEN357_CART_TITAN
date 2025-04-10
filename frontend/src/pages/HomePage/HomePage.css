@@ -1,70 +1,181 @@
-.homeStack {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    height: 100vh;
-    /* Use viewport height instead of 100% */
-    padding: 4rem;
-    /* Add some padding */
+.homeContainer {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 2rem;
+  opacity: 0;
+
+}
+
+.fade-in {
+  animation: fadeIn 0.8s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.heroSection {
+  text-align: center;
+  margin-bottom: 3rem;
 }
 
 .headline {
-    font-family: "Shrikhand", serif;
-    font-weight: 400;
-    font-style: normal;
-    font-size: 5rem;
-    /* Adjust as needed */
-    text-align: center;
-    margin-bottom: 2rem;
-
-    /* Space between text and images */
+  margin-bottom: 1rem;
+  line-height: 1.2;
+color: #54614c;
+    font-size: 3rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.stores {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    gap: 2rem;
-    /* Reduced gap */
-    max-width: 100%;
-    /* Ensure it doesn't overflow the parent */
-    flex-wrap: wrap;
-    /* Allow wrapping if screen is too narrow */
-
+.subheading {
+  font-size: 1.5rem;
+  color: #666;
+  max-width: 700px;
+  margin: 0 auto;
 
 }
 
-.stores_image {
-    width: 150px;
-    height: 150px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    transition: box-shadow 0.3s ease;
-    border-radius: 50%;
-    /* Add smooth transition for the shadow effect */
-
-    &:hover {
-        cursor: pointer;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        /* Add shadow on hover */
-        transform: translateY(-2px);
-        /* Optional: slight lift effect */
-    }
+.storesGrid {
+  display: grid;
+  /* Modified this line to ensure 4 cards in a row on larger screens */
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3rem;
 }
 
-.stores_image img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    /* Maintain aspect ratio */
+.storeCard {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
-.shrikhand_regular {
-    font-family: "Shrikhand", serif;
-    font-weight: 400;
-    font-style: normal;
+.storeCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 20px rgba(0,0,0,0.15);
+}
+
+.storeCard.active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.storeImageContainer {
+  background-color: #f8f8f8;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 160px;
+}
+
+.storeLogo {
+  max-width: 100%;
+  max-height: 120px;
+  transition: transform 0.3s ease;
+}
+
+.storeCard:hover .storeLogo {
+  transform: scale(1.05);
+}
+
+.storeInfo {
+  padding: 1.5rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.storeInfo h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.storeInfo p {
+  margin: 0 0 1.5rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.exploreButton {
+  background: linear-gradient(45deg, #ff7e5f, #feb47b);
+  color: white;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.3s ease;
+  margin-top: auto;
+}
+
+.storeCard:hover .exploreButton {
+  background: linear-gradient(45deg, #ff6a4c, #feb47b);
+}
+
+.featuredSection {
+  background-color: #f9f9f9;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-top: 3rem;
+}
+
+.featuredSection h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+.steps {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+  min-width: 200px;
+}
+
+.stepIcon {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(45deg, #ff7e5f, #feb47b);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .headline {
+    font-size: 2.2rem;
+  }
+
+  .storesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .steps {
+    flex-direction: column;
+  }
+
+  .step {
+    margin-bottom: 1.5rem;
+  }
 }

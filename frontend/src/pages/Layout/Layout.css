@@ -13,8 +13,14 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+}
 
-
+#recipes {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #557b17;
+    font-size: 2rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .logo_div {
@@ -27,7 +33,6 @@
     &:hover {
         cursor: pointer;
     }
-
 }
 
 .logo_image {
@@ -44,12 +49,14 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-evenly;
-
 }
 
 .tab_image {
     height: 2rem;
+}
 
+.user_image {
+    height: 3rem;
 }
 
 .tab_div {
@@ -65,13 +72,11 @@
         box-shadow: 0 5px 15px rgba(85, 123, 23, 0.5);
         transform: translateY(-3px);
     }
-
 }
 
 .main {
     flex-grow: 1;
     background-image: url('../../../public/letuce_background.png');
-
     /*background-color: #baf2a2;*/
     /* Replace with your image path */
     background-size: cover;
@@ -80,4 +85,40 @@
     display: flex;
     flex-direction: column;
     padding: 2rem;
+}
+
+/* New Tooltip Styles */
+.user-tooltip-container {
+    position: relative;
+}
+
+.user-tooltip {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 240px;
+    background-color: #e8f0fe;
+    border: 1px solid #b8c8e0;
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    color: #245174;
+    font-size: 14px;
+}
+
+.user-tooltip p {
+    margin: 4px 0;
+    line-height: 1.4;
+}
+
+.user-tooltip:before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    right: 20px;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid #e8f0fe;
 }
