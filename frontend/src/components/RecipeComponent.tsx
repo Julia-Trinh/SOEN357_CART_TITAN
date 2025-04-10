@@ -22,7 +22,7 @@ interface RecipeComponentProps {
 
 const RecipeComponent: React.FC<RecipeComponentProps> = ({
   marketData = {},
-  apiKey = "34a7dac016c6479c9c30c16be772b3d8", // Use env variable in production
+  apiKey = "c8124f08aac54de3a9baaf9fed43b4b9", // Use env variable in production
   updateGroceryList
 }) => {
   const navigate = useNavigate();
@@ -109,7 +109,7 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
 
   // Format ingredients for API call
   const formatIngredients = (ingredients: Ingredient[]): string => {
-    return ingredients.map(ing => ing.name).join(",+");
+    return ingredients.map(ing => ing.name).join(",");
   };
 
   // Handle clicking on an ingredient to select/deselect it
@@ -260,7 +260,7 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
     return true;
   };
 
-  // Enhanced fetchRecipes function to integrate hardcoded and API recipes better
+  // Enhanced fetchRecipes function using complexSearch endpoint
   const fetchRecipes = async () => {
     setError(null);
     setLoading(true);
@@ -271,35 +271,34 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
       return;
     }
 
-    // Always evaluate hardcoded recipes based on selected ingredients
-    const relevantHardcodedRecipes = hardcodedRecipes.map(recipe => {
-      // Count how many selected ingredients are used in this recipe
-      const matchedIngredients: Ingredient[] = [];
-      let totalRelevance = 0;
+    // Build query parameters for complexSearch endpoint
+    const ingredients = formatIngredients(selectedIngredients);
 
-      selectedIngredients.forEach(selIng => {
-        const matchFound = recipe.apiIngredients.some(apiIng =>
-          apiIng.includes(selIng.name) || selIng.name.includes(apiIng)
-        );
+    // Initialize query parameters
+    const queryParams = new URLSearchParams();
+    queryParams.append('apiKey', apiKey);
+    queryParams.append('number', '4');
+    queryParams.append('addRecipeInformation', 'true');  // Get detailed recipe information
+    queryParams.append('fillIngredients', 'true');       // Get ingredient information
+    queryParams.append('sort', 'max-used-ingredients');  // Sort by max used ingredients
 
-        if (matchFound) {
-          totalRelevance++;
-          matchedIngredients.push(selIng);
-        }
-      });
+    // Add ingredients
+    if (ingredients) {
+      queryParams.append('includeIngredients', ingredients);
+    }
 
-      // Create a new recipe object with matched ingredients
-      return {
-        ...recipe,
-        relevance: totalRelevance,
-        usedIngredients: matchedIngredients
-      };
-    }).filter(recipe => recipe.relevance > 0 && matchesDietaryPreferences(recipe));
+    // Add diet filter if selected
+    if (selectedDiet !== 'None') {
+      queryParams.append('diet', selectedDiet.toLowerCase());
+    }
 
-    // Fetch API recipes
-    const formattedIngredients = formatIngredients(selectedIngredients);
-    const ranking = 2; // Option 2 maximizes used ingredients
-    const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${formattedIngredients}&number=4&ranking=${ranking}&apiKey=${apiKey}`;
+    // Add allergy/intolerance filter if selected
+    if (selectedAllergy !== 'None') {
+      queryParams.append('intolerances', selectedAllergy.toLowerCase());
+    }
+
+    // Construct the URL with all parameters
+    const url = `https://api.spoonacular.com/recipes/complexSearch?${queryParams.toString()}`;
 
     try {
       const response = await fetch(url);
@@ -311,8 +310,33 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
       const data = await response.json();
 
       // Handle the case when no API recipes are found
-      if (!data || data.length === 0) {
-        // Show filtered hardcoded recipes based on matching and dietary preferences
+      if (!data.results || data.results.length === 0) {
+        // Fall back to filtered hardcoded recipes
+        // First filter hardcoded recipes based on selected ingredients
+        const relevantHardcodedRecipes = hardcodedRecipes.map(recipe => {
+          // Count how many selected ingredients are used in this recipe
+          const matchedIngredients: Ingredient[] = [];
+          let totalRelevance = 0;
+
+          selectedIngredients.forEach(selIng => {
+            const matchFound = recipe.apiIngredients.some(apiIng =>
+              apiIng.includes(selIng.name) || selIng.name.includes(apiIng)
+            );
+
+            if (matchFound) {
+              totalRelevance++;
+              matchedIngredients.push(selIng);
+            }
+          });
+
+          // Create a new recipe object with matched ingredients
+          return {
+            ...recipe,
+            relevance: totalRelevance,
+            usedIngredients: matchedIngredients
+          };
+        }).filter(recipe => recipe.relevance > 0 && matchesDietaryPreferences(recipe));
+
         if (relevantHardcodedRecipes.length > 0) {
           setRecipes(relevantHardcodedRecipes.sort((a, b) => b.relevance - a.relevance));
         } else {
@@ -320,13 +344,21 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
           const dietFilteredRecipes = hardcodedRecipes.filter(recipe => matchesDietaryPreferences(recipe));
           setRecipes(dietFilteredRecipes.length > 0 ? dietFilteredRecipes : hardcodedRecipes);
         }
+
         setApiRecipesLoaded(false);
         setLoading(false);
         return;
       }
 
-      const apiRecipes = await Promise.all(data.map(async (recipe: any) => {
+      // Process API results into our recipe format
+      const apiRecipes = await Promise.all(data.results.map(async (recipe: any) => {
+        // Get more detailed information about each recipe
         const details = await getRecipeDetails(recipe.id.toString());
+
+        // Extract missed ingredients from the recipe
+        const missedIngredients = recipe.missedIngredients
+          ? recipe.missedIngredients.map((ingredient: any) => ingredient.name)
+          : [];
 
         return {
           id: recipe.id,
@@ -335,54 +367,91 @@ const RecipeComponent: React.FC<RecipeComponentProps> = ({
           cost: calculateTotalCost(details.usedIngredients),
           content: details.instructions,
           usedIngredients: details.usedIngredients,
-          missedIngredients: recipe.missedIngredients.map((ingredient: any) => ingredient.name),
+          missedIngredients: missedIngredients,
           apiIngredients: details.apiIngredients,
           link: `https://spoonacular.com/recipes/${recipe.title.replace(/\s+/g, '-').toLowerCase()}-${recipe.id}`,
-          // For API recipes, we don't have explicit allergen/diet info
           allergens: [],
-          diet: []
+          diet: recipe.diets || [] // Use diets provided by API
         };
       }));
 
       // Filter API recipes that actually use at least one selected ingredient
-      const filteredApiRecipes = apiRecipes
-        .filter(recipe => recipe.usedIngredients.length > 0)
-        .filter(matchesDietaryPreferences);
+      const filteredApiRecipes = apiRecipes.filter(recipe => recipe.usedIngredients.length > 0);
 
-      // Combine both recipe sources
-      let combinedRecipes = [...filteredApiRecipes];
-
-      // Add hardcoded recipes that match ingredients if we don't have enough API recipes
-      if (filteredApiRecipes.length < 4 && relevantHardcodedRecipes.length > 0) {
-        // Sort hardcoded recipes by relevance
-        const sortedHardcodedRecipes = relevantHardcodedRecipes
-          .sort((a, b) => b.relevance - a.relevance)
-          .slice(0, 4 - filteredApiRecipes.length);
-
-        combinedRecipes = [...filteredApiRecipes, ...sortedHardcodedRecipes];
-      }
-
-      // If we still have fewer than 4 recipes, add any hardcoded recipe that meets dietary preferences
-      if (combinedRecipes.length === 0) {
-        const dietaryFilteredRecipes = hardcodedRecipes.filter(matchesDietaryPreferences);
-        combinedRecipes = dietaryFilteredRecipes.length > 0 ? dietaryFilteredRecipes : hardcodedRecipes;
-        setApiRecipesLoaded(false);
+      // If we have API recipes, use them
+      if (filteredApiRecipes.length > 0) {
+        setRecipes(filteredApiRecipes);
+        setApiRecipesLoaded(true);
       } else {
-        setApiRecipesLoaded(filteredApiRecipes.length > 0);
+        // Fall back to relevant hardcoded recipes
+        const relevantHardcodedRecipes = hardcodedRecipes.map(recipe => {
+          // Count how many selected ingredients are used in this recipe
+          const matchedIngredients: Ingredient[] = [];
+          let totalRelevance = 0;
+
+          selectedIngredients.forEach(selIng => {
+            const matchFound = recipe.apiIngredients.some(apiIng =>
+              apiIng.includes(selIng.name) || selIng.name.includes(apiIng)
+            );
+
+            if (matchFound) {
+              totalRelevance++;
+              matchedIngredients.push(selIng);
+            }
+          });
+
+          return {
+            ...recipe,
+            relevance: totalRelevance,
+            usedIngredients: matchedIngredients
+          };
+        }).filter(recipe => recipe.relevance > 0 && matchesDietaryPreferences(recipe));
+
+        if (relevantHardcodedRecipes.length > 0) {
+          setRecipes(relevantHardcodedRecipes.sort((a, b) => b.relevance - a.relevance));
+        } else {
+          // Only filter by dietary preferences
+          const dietFilteredRecipes = hardcodedRecipes.filter(recipe => matchesDietaryPreferences(recipe));
+          setRecipes(dietFilteredRecipes.length > 0 ? dietFilteredRecipes : hardcodedRecipes);
+        }
+
+        setApiRecipesLoaded(false);
       }
 
-      setRecipes(combinedRecipes);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching recipes:", error);
       setError(`Error retrieving recipes: ${error instanceof Error ? error.message : 'Unknown error'}`);
 
-      // Use filtered hardcoded recipes as fallback
+      // Fall back to hardcoded recipes
+      const relevantHardcodedRecipes = hardcodedRecipes.map(recipe => {
+        // Count how many selected ingredients are used in this recipe
+        const matchedIngredients: Ingredient[] = [];
+        let totalRelevance = 0;
+
+        selectedIngredients.forEach(selIng => {
+          const matchFound = recipe.apiIngredients.some(apiIng =>
+            apiIng.includes(selIng.name) || selIng.name.includes(apiIng)
+          );
+
+          if (matchFound) {
+            totalRelevance++;
+            matchedIngredients.push(selIng);
+          }
+        });
+
+        return {
+          ...recipe,
+          relevance: totalRelevance,
+          usedIngredients: matchedIngredients
+        };
+      }).filter(recipe => recipe.relevance > 0 && matchesDietaryPreferences(recipe));
+
       if (relevantHardcodedRecipes.length > 0) {
         setRecipes(relevantHardcodedRecipes.sort((a, b) => b.relevance - a.relevance));
       } else {
-        // If no relevant hardcoded recipes, just filter by dietary preferences
-        const dietFilteredRecipes = hardcodedRecipes.filter(matchesDietaryPreferences);
+        // Filter hardcoded recipes just by dietary preferences
+        const dietFilteredRecipes = hardcodedRecipes.filter(recipe => matchesDietaryPreferences(recipe));
         setRecipes(dietFilteredRecipes.length > 0 ? dietFilteredRecipes : hardcodedRecipes);
       }
 
